@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메모 관리 앱</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            appleBg: '#f5f5f7',
+            appleCard: '#ffffff',
+            appleBorder: '#e5e5ea',
+            appleText: '#1d1d1f',
+            appleSub: '#6e6e73',
+            appleBlue: '#0071e3'
+          },
+          boxShadow: {
+            apple: '0 10px 40px rgba(0,0,0,0.06)',
+            appleHover: '0 20px 60px rgba(0,0,0,0.10)'
+          },
+          borderRadius: {
+            apple: '20px'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-appleBg min-h-screen text-appleText antialiased">
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>
