@@ -34,8 +34,6 @@ export default function List({
     fetchMemos();
   }, []);
 
-  const handleEdit = (id) => {};
-
   return (
     <section className="bg-appleCard border border-appleBorder shadow-apple rounded-apple p-6">
       {/* 로딩 */}
@@ -92,51 +90,67 @@ export default function List({
 }
 
 function Memo({ memos, onUpdate, onDelete, onToggle, onModify }) {
+  const [isEdit, setIsEdit] = useState(false);
   const { id, title, content, isPinned, createdAt } = memos;
   const baseLi =
     "border border-appleBorder rounded-apple p-5 shadow-apple hover:shadow-appleHover hover:-translate-y-1 transition";
 
+  const handleEdit = (id) => {
+    setIsEdit(true);
+  };
+
   return (
-    <li
-      className={`${baseLi} ${isPinned ? "bg-yellow-50 ring-2 ring-yellow-300" : "bg-white"}`}
-    >
-      <div className="flex justify-between">
-        <div className="flex items-center gap-3">
-          <input type="checkbox" className="accent-black scale-110" />
-          <button
-            className={`text-xl ${!isPinned ? "opacity-40 hover:opacity-100 transition" : ""}`}
-            // onClick={() => onUpdate(id, isPinned)}
-            onClick={() => onToggle(id, isPinned)}
-          >
-            📌
-          </button>
-          {isPinned ? (
-            <span className="text-xs bg-black text-white px-2 py-1 rounded-full">
-              PINNED
-            </span>
-          ) : (
-            ""
-          )}
+    <>
+      <li
+        className={`${baseLi} ${isPinned ? "bg-yellow-50 ring-2 ring-yellow-300" : "bg-white"}`}
+        key={id}
+      >
+        <div className="flex justify-between">
+          <div className="flex items-center gap-3">
+            <input type="checkbox" className="accent-black scale-110" />
+            <button
+              className={`text-xl ${!isPinned ? "opacity-40 hover:opacity-100 transition" : ""}`}
+              // onClick={() => onUpdate(id, isPinned)}
+              onClick={() => onToggle(id, isPinned)}
+            >
+              📌
+            </button>
+            {isPinned ? (
+              <span className="text-xs bg-black text-white px-2 py-1 rounded-full">
+                PINNED
+              </span>
+            ) : (
+              ""
+            )}
+          </div>
+
+          <div className="flex gap-4 text-sm font-medium">
+            <button
+              className="text-appleBlue hover:underline"
+              onClick={() => handleEdit(id)}
+            >
+              수정
+            </button>
+            <button
+              className="text-red-500 hover:underline"
+              onClick={() => onDelete(id)}
+            >
+              삭제
+            </button>
+          </div>
         </div>
 
-        <div className="flex gap-4 text-sm font-medium">
-          <button className="text-appleBlue hover:underline">수정</button>
-          <button
-            className="text-red-500 hover:underline"
-            onClick={() => onDelete(id)}
-          >
-            삭제
-          </button>
+        <h3 className="font-semibold mt-4 text-xl">{title}</h3>
+        <p className="text-appleSub mt-2 leading-relaxed">{content}</p>
+
+        <div className="text-xs text-appleSub mt-4">
+          생성일: {formatDate(createdAt)} | 수정일: 2026-02-09
         </div>
-      </div>
-
-      <h3 className="font-semibold mt-4 text-xl">{title}</h3>
-      <p className="text-appleSub mt-2 leading-relaxed">{content}</p>
-
-      <div className="text-xs text-appleSub mt-4">
-        생성일: {formatDate(createdAt)} | 수정일: 2026-02-09
-      </div>
-    </li>
+      </li>
+      {isEdit && (
+        <EditMemo memos={memos} onUpdate={onUpdate} setIsEdit={setIsEdit} />
+      )}
+    </>
   );
 }
 
@@ -150,26 +164,44 @@ function EmptyMemo() {
   );
 }
 
-function EditMemo() {
+function EditMemo({ memos, onUpdate, setIsEdit }) {
+  const { id, title, content } = memos;
+  const [editedTitle, setEditedTitle] = useState(title);
+  const [editedContent, setEditedContent] = useState(content);
+
+  const handleEditSave = () => {
+    onUpdate(id, {
+      title: editedTitle,
+      content: editedContent,
+    });
+    setIsEdit(false);
+  };
+
   return (
-    <div className="border-2 border-appleBlue rounded-apple p-5 bg-white shadow-apple">
+    <li className="border-2 border-appleBlue rounded-apple p-5 bg-white shadow-apple">
       <input
         className="w-full border border-appleBorder rounded-xl px-4 py-2 mb-2 focus:outline-none focus:border-appleBlue"
-        value="수정중인 메모 제목"
+        value={editedTitle}
+        onChange={(e) => setEditedTitle(e.target.value)}
       />
 
-      <textarea className="w-full border border-appleBorder rounded-xl px-4 py-3 h-28 resize-none focus:outline-none focus:border-appleBlue">
-        수정중인 내용...
-      </textarea>
+      <textarea
+        className="w-full border border-appleBorder rounded-xl px-4 py-3 h-28 resize-none focus:outline-none focus:border-appleBlue"
+        value={editedContent}
+        onChange={(e) => setEditedContent(e.target.value)}
+      ></textarea>
 
       <div className="flex justify-end gap-2 mt-3">
         <button className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 transition">
           취소
         </button>
-        <button className="px-4 py-2 rounded-xl bg-appleBlue text-white hover:brightness-110 transition">
+        <button
+          className="px-4 py-2 rounded-xl bg-appleBlue text-white hover:brightness-110 transition"
+          onClick={handleEditSave}
+        >
           저장
         </button>
       </div>
-    </div>
+    </li>
   );
 }

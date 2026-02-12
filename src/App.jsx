@@ -3,19 +3,13 @@ import Header from "./components/Header";
 import Search from "./components/Search";
 import Form from "./components/Form";
 import List from "./components/List";
-import {
-  getMemos,
-  createMemo,
-  updateMemo,
-  deleteMemo,
-  pinnedMemo,
-} from "./api/memos";
-import { getStorage, saveStorage, deleteAllStorage } from "./api/storage"; // for dev
+import { createMemo, updateMemo, deleteMemo, pinnedMemo } from "./api/memos";
+// import { getStorage, saveStorage, deleteAllStorage } from "./api/storage"; // 개발용
 
 // C : 입력 Form > 저장 addMemo  > 전송(POST) createMemo >> 완료
-// R : 요청(GET) getMemos > 응답 > 갱신 setState > 렌더링(로딩 > 에러 > 빈화면 > 성공) List
-// U
-// D 명령 > 전송(delete)
+// R : 요청(GET) getMemos > 응답 > 갱신 setState > 렌더링(로딩 > 에러 > 빈화면 > 성공) List >> 완료
+// U : 요청(patch) updateMemo > 응단 > 갱신 setState > 렌더링(로딩 > 에러 > 빈화면 > 성공) List
+// D 명령 > 전송(delete) List >> 완료
 
 function App() {
   const [memos, setMemos] = useState([]);
