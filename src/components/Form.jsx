@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 
+// C : 입력 Form > 저장 addMemo  > 전송(POST) createMemo
 export default function Form({ onAdd }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");

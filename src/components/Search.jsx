@@ -1,4 +1,38 @@
-export default function Search() {
+import { useState, useEffect } from "react";
+import { getMemos } from "../api/memos.js";
+
+export default function Search({ setMemos, setIsLoading, setError }) {
+  const [inputValue, setInputValue] = useState(""); // 입력 중인 값
+  const [searchQuery, setSearchQuery] = useState(""); // 적용된 검색어
+
+  const handleSearch = () => {
+    setSearchQuery(inputValue); // 버튼 클릭 시에 검색어를 입력한 값으로 변경 처리
+  };
+  const handleSearchReset = () => {
+    setSearchQuery("");
+    setInputValue("");
+  };
+
+  // useEffect를 사용하여 의존성배열(검색어)가 바뀔때마다, 실행되도록 처리
+  useEffect(() => {
+    const fetchMemos = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await getMemos({ q: searchQuery });
+        setMemos(data.items);
+        // console.log(data);
+      } catch (err) {
+        setError("검색 데이터를 불러오지 못했습니다.");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchMemos();
+    // console.log(searchQuery);
+  }, [searchQuery]);
+
   return (
     <section className="bg-appleCard border border-appleBorder shadow-apple rounded-apple p-6 mb-8 transition hover:shadow-appleHover">
       <div className="flex gap-3 mb-5">
@@ -6,13 +40,21 @@ export default function Search() {
           type="text"
           placeholder="메모 검색"
           className="flex-1 bg-transparent border border-appleBorder rounded-2xl px-5 py-3 focus:outline-none focus:border-appleBlue focus:scale-[1.01] transition"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
         />
 
-        <button className="bg-appleBlue text-white px-5 rounded-2xl hover:brightness-110 active:scale-95 transition font-medium">
+        <button
+          className="bg-appleBlue text-white px-5 rounded-2xl hover:brightness-110 active:scale-95 transition font-medium"
+          onClick={() => handleSearch()}
+        >
           검색
         </button>
 
-        <button className="bg-gray-200 px-5 rounded-2xl hover:bg-gray-300 active:scale-95 transition font-medium">
+        <button
+          className="bg-gray-200 px-5 rounded-2xl hover:bg-gray-300 active:scale-95 transition font-medium"
+          onClick={() => handleSearchReset()}
+        >
           초기화
         </button>
       </div>
