@@ -6,8 +6,9 @@ import { formatDate } from "../utils/date.js";
 export default function List({
   memos,
   setMemos,
-  onToggle,
+  onUpdate,
   onDelete,
+  onToggle,
   onModify,
 }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -78,8 +79,9 @@ export default function List({
               key={item.id}
               memos={item}
               setMemos={setMemos}
-              onToggle={onToggle}
+              onUpdate={onUpdate}
               onDelete={onDelete}
+              onToggle={onToggle}
               onModify={onModify}
             />
           ))}
@@ -89,7 +91,7 @@ export default function List({
   );
 }
 
-function Memo({ memos, onToggle, onDelete, onModify }) {
+function Memo({ memos, onUpdate, onDelete, onToggle, onModify }) {
   const { id, title, content, isPinned, createdAt } = memos;
   const baseLi =
     "border border-appleBorder rounded-apple p-5 shadow-apple hover:shadow-appleHover hover:-translate-y-1 transition";
@@ -103,7 +105,8 @@ function Memo({ memos, onToggle, onDelete, onModify }) {
           <input type="checkbox" className="accent-black scale-110" />
           <button
             className={`text-xl ${!isPinned ? "opacity-40 hover:opacity-100 transition" : ""}`}
-            onClick={() => onToggle(id)}
+            // onClick={() => onUpdate(id, isPinned)}
+            onClick={() => onToggle(id, isPinned)}
           >
             📌
           </button>

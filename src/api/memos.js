@@ -22,3 +22,10 @@ export const updateMemo = async (id, payload) => {
 export const deleteMemo = async (id) => {
   await client.delete(`/memos/${id}`);
 };
+
+// 고정
+export const pinnedMemo = async (id, payload) => {
+  const response = await client.patch(`/memos/${id}/pin`, {
+    isPinned: payload,
+  });
+};
