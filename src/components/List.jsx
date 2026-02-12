@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getMemos, deleteSelectedMemo } from "../api/memos.js";
+import { getMemos, testGetMemos, deleteSelectedMemo } from "../api/memos.js";
 import { formatDate } from "../utils/date.js";
 
 // R : 요청(GET) getMemos > 응답 > 갱신 setState > 렌더링(로딩 > 에러 > 빈화면 > 성공) List
@@ -15,8 +15,6 @@ export default function List({
   const [error, setError] = useState(null);
   const [checkAll, setCheckAll] = useState(false);
   const [isChecked, setIsChecked] = useState([]);
-
-  const refetch = () => {};
 
   //전체선택 클릭시 setIsChecked에 ID 값 삽입
   const handleCheckAll = (checked) => {
@@ -49,8 +47,8 @@ export default function List({
   };
 
   // 선택삭제 클릭시 setIsChecked에 있는 ID값 삭제 요청
-  const handleCheckedDelete = async () => {
-    console.log(isChecked.length);
+  const handleCheckDelete = async () => {
+    // console.log(isChecked.length);
     try {
       if (isChecked.length > 0) {
         // console.log("삭제");
@@ -67,23 +65,42 @@ export default function List({
     // console.log(isChecked);
   };
 
+  // 목록 불러오기
+  const fetchMemos = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await getMemos();
+      setMemos(data.items);
+      // console.log(data);
+    } catch (err) {
+      setError("데이터를 불러오지 못했습니다.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 오류 테스트용
+  const testFetchMemos = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await testGetMemos();
+      setMemos(data.items);
+      // console.log(data);
+    } catch (err) {
+      setError("데이터를 불러오지 못했습니다.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     console.log("초기 리스트 로드");
-    const fetchMemos = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const data = await getMemos();
-        setMemos(data.items);
-        // console.log(data);
-      } catch (err) {
-        setError("데이터를 불러오지 못했습니다.");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchMemos();
+    testFetchMemos(); // 오류 테스트
+    fetchMemos(); // 배포
   }, []);
 
   return (
@@ -95,7 +112,7 @@ export default function List({
       {error && (
         <div>
           <p>에러: {error}</p>
-          <button onClick={refetch}>다시 시도</button>
+          <button onClick={fetchMemos}>다시 시도</button>
         </div>
       )}
 
@@ -118,7 +135,7 @@ export default function List({
 
           <button
             className="bg-red-500 text-white px-4 py-2 rounded-xl hover:opacity-85 active:scale-95 transition font-medium"
-            onClick={() => handleCheckedDelete()}
+            onClick={() => handleCheckDelete()}
           >
             선택 삭제
           </button>

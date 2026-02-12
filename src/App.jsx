@@ -42,10 +42,10 @@ function App() {
   };
 
   const handleUpdate = async (id, changes) => {
-    console.log(id, changes);
+    // console.log(id, changes);
     try {
       const updated = await updateMemo(id, changes);
-      console.log(updated);
+      // console.log(updated);
       setMemos((prev) => prev.map((memo) => (memo.id === id ? updated : memo)));
     } catch (err) {
       setError("수정에 실패했습니다");
