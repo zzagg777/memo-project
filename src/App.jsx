@@ -78,6 +78,7 @@ function App() {
     <main className="max-w-4xl mx-auto p-8">
       <Header></Header>
       <Search
+        memos={memos}
         setMemos={setMemos} // 검색 후 새로운 메모목록 반환
         setIsLoading={setIsLoading} // 검색 시 로딩
         setError={setError} // 검색 시 오류
