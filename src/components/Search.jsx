@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
 import { getMemos } from "../api/memos.js";
 
-export default function Search({ setMemos, setIsLoading, setError }) {
-  const [inputValue, setInputValue] = useState(""); // 입력 중인 값
-  const [searchQuery, setSearchQuery] = useState(""); // 적용된 검색어
-
+export default function Search({
+  setMemos,
+  setIsLoading,
+  setError,
+  inputValue,
+  setInputValue,
+  searchQuery,
+  setSearchQuery,
+  handleSearchReset,
+  setIsSearch,
+}) {
   const handleSearch = () => {
     setSearchQuery(inputValue); // 버튼 클릭 시에 검색어를 입력한 값으로 변경 처리
-  };
-  const handleSearchReset = () => {
-    setSearchQuery("");
-    setInputValue("");
   };
 
   // useEffect를 사용하여 의존성배열(검색어)가 바뀔때마다, 실행되도록 처리
@@ -22,6 +25,9 @@ export default function Search({ setMemos, setIsLoading, setError }) {
         const data = await getMemos({ q: searchQuery });
         setMemos(data.items);
         // console.log(data);
+        if (data.items.length === 0) {
+          setIsSearch(false);
+        }
       } catch (err) {
         setError("검색 데이터를 불러오지 못했습니다.");
         console.error(err);
@@ -53,7 +59,7 @@ export default function Search({ setMemos, setIsLoading, setError }) {
 
         <button
           className="bg-gray-200 px-5 rounded-2xl hover:bg-gray-300 active:scale-95 transition font-medium"
-          onClick={() => handleSearchReset()}
+          onClick={handleSearchReset}
         >
           초기화
         </button>

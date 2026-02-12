@@ -14,12 +14,16 @@ import { createMemo, updateMemo, deleteMemo, pinnedMemo } from "./api/memos";
 function App() {
   const [memos, setMemos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSearch, setIsSearch] = useState(true);
   const [error, setError] = useState(null);
+  const [inputValue, setInputValue] = useState(""); // 입력 중인 값
+  const [searchQuery, setSearchQuery] = useState(""); // 적용된 검색어
 
   const handleCreate = async (title, content) => {
     try {
       const newMemo = await createMemo({ title, content });
       setMemos((prev) => [newMemo, ...prev]);
+      handleSearchReset();
     } catch (err) {
       console.error("메모 저장 실패 : ", err);
     }
@@ -49,7 +53,7 @@ function App() {
   };
 
   const handlePinned = async (id, changes) => {
-    console.log(id, changes);
+    // console.log(id, changes);
     try {
       await pinnedMemo(id, !changes);
       const newMemo = memos.map((memo) => {
@@ -65,6 +69,11 @@ function App() {
     }
   };
 
+  const handleSearchReset = () => {
+    setSearchQuery("");
+    setInputValue("");
+  };
+
   return (
     <main className="max-w-4xl mx-auto p-8">
       <Header></Header>
@@ -72,6 +81,12 @@ function App() {
         setMemos={setMemos} // 검색 후 새로운 메모목록 반환
         setIsLoading={setIsLoading} // 검색 시 로딩
         setError={setError} // 검색 시 오류
+        searchQuery={searchQuery} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
+        setSearchQuery={setSearchQuery} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
+        inputValue={inputValue} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
+        setInputValue={setInputValue} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
+        handleSearchReset={handleSearchReset} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
+        setIsSearch={setIsSearch}
       ></Search>
       <Form
         onAdd={handleCreate} // 입력 시 메모 생성
@@ -81,6 +96,7 @@ function App() {
         setMemos={setMemos}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
+        isSearch={isSearch}
         onError={error}
         setError={setError}
         onDelete={handleDelete}

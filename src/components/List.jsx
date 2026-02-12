@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getMemos } from "../api/memos.js";
+import { getMemos, deleteSelectedMemo } from "../api/memos.js";
 import { formatDate } from "../utils/date.js";
 
 // R : 요청(GET) getMemos > 응답 > 갱신 setState > 렌더링(로딩 > 에러 > 빈화면 > 성공) List
@@ -9,11 +9,63 @@ export default function List({
   onUpdate,
   onDelete,
   onToggle,
-  onModify,
+  isSearch,
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [checkAll, setCheckAll] = useState(false);
+  const [isChecked, setIsChecked] = useState([]);
+
+  const refetch = () => {};
+
+  //전체선택 클릭시 setIsChecked에 ID 값 삽입
+  const handleCheckAll = (checked) => {
+    // console.log(checked);
+    const memoItems = document.querySelectorAll(".memo-item");
+    memoItems.forEach((memoItem) => {
+      const memoItemId = memoItem.getAttribute("id");
+      memoItem.querySelector(".memo-item__check").checked = checked;
+      if (!checkAll) {
+        // console.log(memoItemId);
+        if (!isChecked.includes(memoItemId)) {
+          setIsChecked((prev) => [...prev, memoItemId]);
+        }
+      } else {
+        setIsChecked([]);
+      }
+    });
+    setCheckAll(checked);
+  };
+
+  //선택 클릭시 setIsChecked에 ID 값 삽입
+  const handleCheck = (id) => {
+    if (!isChecked.includes(id)) {
+      setIsChecked((prev) => [...prev, id]);
+    } else {
+      const newChecked = isChecked.filter((check) => check !== id);
+      setIsChecked(newChecked);
+    }
+    // console.log(isChecked);
+  };
+
+  // 선택삭제 클릭시 setIsChecked에 있는 ID값 삭제 요청
+  const handleCheckedDelete = async () => {
+    console.log(isChecked.length);
+    try {
+      if (isChecked.length > 0) {
+        // console.log("삭제");
+        await deleteSelectedMemo({ data: { ids: isChecked } });
+        const data = await getMemos();
+        setMemos(data.items);
+      }
+    } catch (err) {
+      setError("삭제에 실패했습니다.");
+      console.error("메모 삭제 실패 : ", err);
+    } finally {
+      handleCheckAll(false);
+    }
+    // console.log(isChecked);
+  };
 
   useEffect(() => {
     console.log("초기 리스트 로드");
@@ -23,7 +75,7 @@ export default function List({
       try {
         const data = await getMemos();
         setMemos(data.items);
-        console.log(data);
+        // console.log(data);
       } catch (err) {
         setError("데이터를 불러오지 못했습니다.");
         console.error(err);
@@ -55,11 +107,19 @@ export default function List({
 
         <div className="flex items-center gap-4 text-sm">
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" className="accent-black scale-110" />
+            <input
+              type="checkbox"
+              className="checkBoxAll accent-black scale-110"
+              onChange={(e) => handleCheckAll(e.target.checked)}
+              checked={checkAll ? true : false}
+            />
             전체 선택
           </label>
 
-          <button className="bg-red-500 text-white px-4 py-2 rounded-xl hover:opacity-85 active:scale-95 transition font-medium">
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded-xl hover:opacity-85 active:scale-95 transition font-medium"
+            onClick={() => handleCheckedDelete()}
+          >
             선택 삭제
           </button>
         </div>
@@ -67,7 +127,9 @@ export default function List({
 
       {/* items */}
       {/* 빈화면 */}
-      {!isLoading && !error && memos.length === 0 && <EmptyMemo />}
+      {!isLoading && !error && memos.length === 0 && (
+        <EmptyMemo isSearch={isSearch} />
+      )}
 
       {/* 성공 */}
       {!isLoading && !error && memos.length > 0 && (
@@ -80,7 +142,7 @@ export default function List({
               onUpdate={onUpdate}
               onDelete={onDelete}
               onToggle={onToggle}
-              onModify={onModify}
+              onCheck={handleCheck}
             />
           ))}
         </ul>
@@ -89,11 +151,12 @@ export default function List({
   );
 }
 
-function Memo({ memos, onUpdate, onDelete, onToggle, onModify }) {
+function Memo({ memos, onUpdate, onDelete, onToggle, onCheck }) {
   const [isEdit, setIsEdit] = useState(false);
   const { id, title, content, isPinned, createdAt } = memos;
+  const [pinned, setIsPinned] = useState(isPinned);
   const baseLi =
-    "border border-appleBorder rounded-apple p-5 shadow-apple hover:shadow-appleHover hover:-translate-y-1 transition";
+    "memo-item border border-appleBorder rounded-apple p-5 shadow-apple hover:shadow-appleHover hover:-translate-y-1 transition";
 
   const handleEdit = (id) => {
     setIsEdit(true);
@@ -102,15 +165,20 @@ function Memo({ memos, onUpdate, onDelete, onToggle, onModify }) {
   return (
     <>
       <li
+        id={id}
         className={`${baseLi} ${isPinned ? "bg-yellow-50 ring-2 ring-yellow-300" : "bg-white"}`}
         key={id}
       >
         <div className="flex justify-between">
           <div className="flex items-center gap-3">
-            <input type="checkbox" className="accent-black scale-110" />
+            <input
+              type="checkbox"
+              className="memo-item__check accent-black scale-110"
+              onChange={() => onCheck(id)}
+            />
             <button
               className={`text-xl ${!isPinned ? "opacity-40 hover:opacity-100 transition" : ""}`}
-              // onClick={() => onUpdate(id, isPinned)}
+              // onClick={() => handlePinned(id, isPinned)}
               onClick={() => onToggle(id, isPinned)}
             >
               📌
@@ -154,12 +222,20 @@ function Memo({ memos, onUpdate, onDelete, onToggle, onModify }) {
   );
 }
 
-function EmptyMemo() {
+function EmptyMemo({ isSearch }) {
   return (
     <div className="text-center py-16 text-appleSub">
       <div className="text-5xl mb-3">📝</div>
-      <p className="text-lg">아직 메모가 없습니다</p>
-      <p className="text-sm">첫 메모를 추가해보세요!</p>
+      {!isSearch ? (
+        <>
+          <p className="text-lg">검색된 메모가 없습니다</p>
+        </>
+      ) : (
+        <>
+          <p className="text-lg">아직 메모가 없습니다</p>
+        </>
+      )}
+      <p className="text-sm">새 메모를 추가해보세요!</p>
     </div>
   );
 }

@@ -23,6 +23,11 @@ export const deleteMemo = async (id) => {
   await client.delete(`/memos/${id}`);
 };
 
+// 삭제
+export const deleteSelectedMemo = async (ids) => {
+  await client.delete(`/memos/`, ids);
+};
+
 // 고정
 export const pinnedMemo = async (id, payload) => {
   const response = await client.patch(`/memos/${id}/pin`, {
