@@ -262,6 +262,10 @@ function EditMemo({ memos, onUpdate, setIsEdit }) {
   const [editedTitle, setEditedTitle] = useState(title);
   const [editedContent, setEditedContent] = useState(content);
 
+  const handleEditCancel = () => {
+    setIsEdit(false);
+  };
+
   const handleEditSave = () => {
     onUpdate(id, {
       title: editedTitle,
@@ -285,7 +289,10 @@ function EditMemo({ memos, onUpdate, setIsEdit }) {
       ></textarea>
 
       <div className="flex justify-end gap-2 mt-3">
-        <button className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 transition">
+        <button
+          className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 transition"
+          onClick={handleEditCancel}
+        >
           취소
         </button>
         <button
