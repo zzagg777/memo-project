@@ -99,7 +99,7 @@ export default function List({
 
   useEffect(() => {
     console.log("초기 리스트 로드");
-    testFetchMemos(); // 오류 테스트
+    // testFetchMemos(); // 오류 테스트
     fetchMemos(); // 배포
   }, []);
 
