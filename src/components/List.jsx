@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getMemos, testGetMemos, deleteSelectedMemo } from "../api/memos.js";
+import { getMemos, deleteSelectedMemo } from "../api/memos.js";
 import { formatDate } from "../utils/date.js";
 
 // R : 요청(GET) getMemos > 응답 > 갱신 setState > 렌더링(로딩 > 에러 > 빈화면 > 성공) List
@@ -66,11 +66,11 @@ export default function List({
   };
 
   // 목록 불러오기
-  const fetchMemos = async () => {
+  const fetchMemos = async (params = {}) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await getMemos();
+      const data = await getMemos(params);
       setMemos(data.items);
       // console.log(data);
     } catch (err) {
@@ -99,7 +99,7 @@ export default function List({
 
   useEffect(() => {
     console.log("초기 리스트 로드");
-    // testFetchMemos(); // 오류 테스트
+    // fetchMemos({ fail: 1 }); // 오류 발생 테스트
     fetchMemos(); // 배포
   }, []);
 
@@ -112,7 +112,13 @@ export default function List({
       {error && (
         <div>
           <p>에러: {error}</p>
-          <button onClick={fetchMemos}>다시 시도</button>
+          <button
+            onClick={() => {
+              fetchMemos();
+            }}
+          >
+            다시 시도
+          </button>
         </div>
       )}
 

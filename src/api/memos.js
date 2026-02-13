@@ -1,13 +1,10 @@
 import client from "./client";
 
+const PATH = "/memos";
 // 목록 조회
+// 백엔드에서 에러 등 테스트를 params 객체의 요소로 넣어 둘 경우 함수 호출 단계에서 매개변수를 사용해서 접근가능
 export const getMemos = async (params = {}) => {
   const response = await client.get("/memos", { params });
-  return response.data;
-};
-
-export const testGetMemos = async (params = {}) => {
-  const response = await client.get("/memos?fail=1", { params });
   return response.data;
 };
 
