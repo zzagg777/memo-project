@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, createContext } from "react";
 import Header from "./components/Header";
 import Search from "./components/Search";
 import Form from "./components/Form";
@@ -11,13 +11,19 @@ import { createMemo, updateMemo, deleteMemo, pinnedMemo } from "./api/memos";
 // U : 요청(patch) updateMemo > 응단 > 갱신 setState > 렌더링(로딩 > 에러 > 빈화면 > 성공) List
 // D 명령 > 전송(delete) List >> 완료
 
+//1.만들기 createContext()
+export const ThemeContext = createContext(null);
+
 function App() {
+  const [theme, setTheme] = useState("light");
   const [memos, setMemos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSearch, setIsSearch] = useState(true);
   const [error, setError] = useState(null);
   const [inputValue, setInputValue] = useState(""); // 입력 중인 값
   const [searchQuery, setSearchQuery] = useState(""); // 적용된 검색어
+
+  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
   const handleCreate = async (title, content) => {
     try {
@@ -75,36 +81,41 @@ function App() {
   };
 
   return (
-    <main className="max-w-4xl mx-auto p-8">
-      <Header></Header>
-      <Search
-        memos={memos}
-        setMemos={setMemos} // 검색 후 새로운 메모목록 반환
-        setIsLoading={setIsLoading} // 검색 시 로딩
-        setError={setError} // 검색 시 오류
-        searchQuery={searchQuery} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
-        setSearchQuery={setSearchQuery} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
-        inputValue={inputValue} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
-        setInputValue={setInputValue} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
-        handleSearchReset={handleSearchReset} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
-        setIsSearch={setIsSearch}
-      ></Search>
-      <Form
-        onAdd={handleCreate} // 입력 시 메모 생성
-      ></Form>
-      <List
-        memos={memos}
-        setMemos={setMemos}
-        isLoading={isLoading}
-        setIsLoading={setIsLoading}
-        isSearch={isSearch}
-        onError={error}
-        setError={setError}
-        onDelete={handleDelete}
-        onUpdate={handleUpdate}
-        onToggle={handlePinned}
-      ></List>
-    </main>
+    //2.제공하기 <Provider value={}>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <main
+        className={`max-w-4xl mx-auto p-8 ${theme === "dark" ? "bg-black" : "bg-white"}`}
+      >
+        <Header />
+        <Search
+          memos={memos}
+          setMemos={setMemos} // 검색 후 새로운 메모목록 반환
+          setIsLoading={setIsLoading} // 검색 시 로딩
+          setError={setError} // 검색 시 오류
+          searchQuery={searchQuery} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
+          setSearchQuery={setSearchQuery} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
+          inputValue={inputValue} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
+          setInputValue={setInputValue} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
+          handleSearchReset={handleSearchReset} // 검색 후 추가시 목록 초기화를 위하여 전역변수로 변경
+          setIsSearch={setIsSearch}
+        ></Search>
+        <Form
+          onAdd={handleCreate} // 입력 시 메모 생성
+        ></Form>
+        <List
+          memos={memos}
+          setMemos={setMemos}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+          isSearch={isSearch}
+          onError={error}
+          setError={setError}
+          onDelete={handleDelete}
+          onUpdate={handleUpdate}
+          onToggle={handlePinned}
+        ></List>
+      </main>
+    </ThemeContext.Provider>
   );
 }
 
