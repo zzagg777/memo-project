@@ -176,7 +176,7 @@ export default function List({
 
 function Memo({ memos, onUpdate, onDelete, onToggle, onCheck }) {
   const [isEdit, setIsEdit] = useState(false);
-  const { id, title, content, isPinned, createdAt } = memos;
+  const { id, title, content, isPinned, createdAt, updatedAt } = memos;
   const [pinned, setIsPinned] = useState(isPinned);
   const baseLi =
     "memo-item border border-appleBorder rounded-apple p-5 shadow-apple hover:shadow-appleHover hover:-translate-y-1 transition";
@@ -235,7 +235,7 @@ function Memo({ memos, onUpdate, onDelete, onToggle, onCheck }) {
         <p className="text-appleSub mt-2 leading-relaxed">{content}</p>
 
         <div className="text-xs text-appleSub mt-4">
-          생성일: {formatDate(createdAt)} | 수정일: 2026-02-09
+          생성일: {formatDate(createdAt)} | 수정일: {formatDate(updatedAt)}
         </div>
       </li>
       {isEdit && (

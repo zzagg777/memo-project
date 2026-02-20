@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>메모 관리 앱</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            appleBg: '#f5f5f7',
+            appleCard: '#ffffff',
+            appleBorder: '#e5e5ea',
+            appleText: '#1d1d1f',
+            appleSub: '#6e6e73',
+            appleBlue: '#0071e3'
+          },
+          boxShadow: {
+            apple: '0 10px 40px rgba(0,0,0,0.06)',
+            appleHover: '0 20px 60px rgba(0,0,0,0.10)',
+            fab: '0 8px 25px rgba(0,113,227,0.4)'
+          },
+          borderRadius: {
+            apple: '20px'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-appleBg min-h-screen text-appleText antialiased">
+
+  <div class="max-w-4xl mx-auto p-8">
+
+    <!-- HEADER -->
+    <header class="mb-12">
+      <h1 class="text-4xl font-semibold tracking-tight">메모 관리</h1>
+      <p class="text-appleSub mt-2 text-lg">React + Axios + CRUD 프로젝트</p>
+    </header>
+
+
+    <!-- SEARCH -->
+    <section
+      class="bg-appleCard border border-appleBorder shadow-apple rounded-apple p-6 mb-8 transition hover:shadow-appleHover">
+
+      <div class="flex gap-3 mb-5">
+        <input type="text" placeholder="메모 검색"
+          class="flex-1 bg-transparent border border-appleBorder rounded-2xl px-5 py-3 focus:outline-none focus:border-appleBlue focus:scale-[1.01] transition" />
+
+        <button
+          class="bg-appleBlue text-white px-5 rounded-2xl hover:brightness-110 active:scale-95 transition font-medium">
+          검색
+        </button>
+
+        <button class="bg-gray-200 px-5 rounded-2xl hover:bg-gray-300 active:scale-95 transition font-medium">
+          초기화
+        </button>
+      </div>
+
+      <div class="flex gap-3 flex-wrap">
+
+        <select class="border border-appleBorder rounded-2xl px-4 py-2 bg-white hover:border-gray-300 transition">
+          <option>생성일</option>
+          <option>수정일</option>
+          <option>제목</option>
+        </select>
+
+        <select class="border border-appleBorder rounded-2xl px-4 py-2 bg-white hover:border-gray-300 transition">
+          <option>오름차순</option>
+          <option>내림차순</option>
+        </select>
+
+        <select class="border border-appleBorder rounded-2xl px-4 py-2 bg-white hover:border-gray-300 transition">
+          <option>전체</option>
+          <option>고정만</option>
+          <option>고정 안된 것만</option>
+        </select>
+
+      </div>
+    </section>
+
+
+    <!-- FORM (Hidden default - React에서 상태로 제어 추천) -->
+    <!-- 예: isFormOpen && <MemoForm /> -->
+    <section
+      class="bg-appleCard border border-appleBorder shadow-apple rounded-apple p-6 mb-8 transition hover:shadow-appleHover hidden">
+
+      <div class="flex flex-col gap-3">
+
+        <input placeholder="제목"
+          class="w-full bg-transparent border border-appleBorder rounded-2xl px-5 py-3 focus:outline-none focus:border-appleBlue focus:scale-[1.01] transition" />
+
+        <textarea placeholder="내용을 입력하세요"
+          class="w-full bg-transparent border border-appleBorder rounded-2xl px-5 py-4 h-32 resize-none focus:outline-none focus:border-appleBlue focus:scale-[1.01] transition"></textarea>
+
+        <div class="flex justify-end gap-2">
+          <button class="px-5 py-2 rounded-2xl bg-gray-200 hover:bg-gray-300 transition font-medium">
+            취소
+          </button>
+          <button
+            class="bg-black text-white px-6 py-2 rounded-2xl hover:opacity-80 active:scale-95 transition font-medium">
+            추가
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- LIST -->
+    <section class="bg-appleCard border border-appleBorder shadow-apple rounded-apple p-6">
+
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold tracking-tight">
+          메모 목록 (3)
+        </h2>
+
+        <div class="flex items-center gap-4 text-sm">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" class="accent-black scale-110" />
+            전체 선택
+          </label>
+
+          <button
+            class="bg-red-500 text-white px-4 py-2 rounded-xl hover:opacity-85 active:scale-95 transition font-medium">
+            선택 삭제
+          </button>
+        </div>
+      </div>
+
+
+      <div class="grid gap-4">
+
+        <!-- PINNED CARD -->
+        <div
+          class="border border-appleBorder rounded-apple p-5 bg-yellow-50 shadow-apple hover:shadow-appleHover hover:-translate-y-1 transition">
+
+          <div class="flex justify-between">
+
+            <div class="flex items-center gap-3">
+              <input type="checkbox" class="accent-black scale-110" />
+              <button class="text-xl">📌</button>
+              <span class="text-xs bg-black text-white px-2 py-1 rounded-full">PINNED</span>
+            </div>
+
+            <div class="flex gap-4 text-sm font-medium">
+              <button class="text-appleBlue hover:underline">수정</button>
+              <button class="text-red-500 hover:underline">삭제</button>
+            </div>
+
+          </div>
+
+          <h3 class="font-semibold mt-4 text-xl">회의 준비</h3>
+          <p class="text-appleSub mt-2 leading-relaxed">
+            내일 오전 회의 자료 정리하고 발표 순서 체크하기.
+          </p>
+
+          <div class="text-xs text-appleSub mt-4">
+            생성일: 2026-02-10 | 수정일: 2026-02-10
+          </div>
+
+        </div>
+
+
+        <!-- NORMAL CARD -->
+        <div
+          class="border border-appleBorder rounded-apple p-5 bg-white shadow-apple hover:shadow-appleHover hover:-translate-y-1 transition">
+
+          <div class="flex justify-between">
+
+            <div class="flex items-center gap-3">
+              <input type="checkbox" class="accent-black scale-110" />
+              <button class="text-xl opacity-40 hover:opacity-100 transition">📌</button>
+            </div>
+
+            <div class="flex gap-4 text-sm font-medium">
+              <button class="text-appleBlue hover:underline">수정</button>
+              <button class="text-red-500 hover:underline">삭제</button>
+            </div>
+
+          </div>
+
+          <h3 class="font-semibold mt-4 text-xl">운동 가기</h3>
+          <p class="text-appleSub mt-2 leading-relaxed">
+            하체 운동 + 30분 러닝.
+          </p>
+
+          <div class="text-xs text-appleSub mt-4">
+            생성일: 2026-02-09 | 수정일: 2026-02-09
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- FLOATING ACTION BUTTON -->
+  <button
+    class="fixed bottom-10 right-10 w-16 h-16 bg-appleBlue text-white text-3xl rounded-full shadow-fab hover:scale-110 active:scale-95 transition flex items-center justify-center">
+    +
+  </button>
+
+</body>
+
+</html>
