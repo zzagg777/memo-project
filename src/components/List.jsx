@@ -1,18 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { MemoContext, ACTION_TYPE } from "../App";
 import { getMemos, deleteSelectedMemo } from "../api/memos.js";
 import { formatDate } from "../utils/date.js";
+import { Link } from "react-router-dom";
 
 // R : 요청(GET) getMemos > 응답 > 갱신 setState > 렌더링(로딩 > 에러 > 빈화면 > 성공) List
-export default function List({
-  memos,
-  setMemos,
-  onUpdate,
-  onDelete,
-  onToggle,
-  isSearch,
-}) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+export default function List({}) {
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [error, setError] = useState(null);
+  const { state, dispatch } = useContext(MemoContext);
+  const { memos, isLoading, error, isSearch } = state;
+
   const [checkAll, setCheckAll] = useState(false);
   const [isChecked, setIsChecked] = useState([]);
 
@@ -54,11 +52,16 @@ export default function List({
         // console.log("삭제");
         await deleteSelectedMemo({ data: { ids: isChecked } });
         const data = await getMemos();
-        setMemos(data.items);
+        // setMemos(data.items);
+        dispatch({ type: ACTION_TYPE.set, payload: data.items });
       }
     } catch (err) {
-      setError("삭제에 실패했습니다.");
-      console.error("메모 삭제 실패 : ", err);
+      // setError("삭제에 실패했습니다.");
+      // console.error("메모 삭제 실패 : ", err);
+      dispatch({
+        type: ACTION_TYPE.error,
+        payload: "메모 삭제 실패",
+      });
     } finally {
       handleCheckAll(false);
     }
@@ -67,33 +70,28 @@ export default function List({
 
   // 목록 불러오기
   const fetchMemos = async (params = {}) => {
-    setIsLoading(true);
-    setError(null);
+    dispatch({ type: ACTION_TYPE.loading, payload: true });
+    dispatch({
+      type: ACTION_TYPE.error,
+      payload: null,
+    });
     try {
       const data = await getMemos(params);
-      setMemos(data.items);
+      // setMemos(data.items);
+      dispatch({
+        type: ACTION_TYPE.set,
+        payload: data.items,
+      });
       // console.log(data);
     } catch (err) {
-      setError("데이터를 불러오지 못했습니다.");
-      console.error(err);
+      // setError("데이터를 불러오지 못했습니다.");
+      // console.error(err);
+      dispatch({
+        type: ACTION_TYPE.error,
+        payload: "메모 로드 실패",
+      });
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 오류 테스트용
-  const testFetchMemos = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await testGetMemos();
-      setMemos(data.items);
-      // console.log(data);
-    } catch (err) {
-      setError("데이터를 불러오지 못했습니다.");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
+      dispatch({ type: ACTION_TYPE.loading, payload: false });
     }
   };
 
@@ -158,15 +156,7 @@ export default function List({
       {!isLoading && !error && memos.length > 0 && (
         <ul className="grid gap-4">
           {memos.map((item) => (
-            <Memo
-              key={item.id}
-              memos={item}
-              setMemos={setMemos}
-              onUpdate={onUpdate}
-              onDelete={onDelete}
-              onToggle={onToggle}
-              onCheck={handleCheck}
-            />
+            <Memo key={item.id} memo={item} onCheck={handleCheck} />
           ))}
         </ul>
       )}
@@ -174,10 +164,10 @@ export default function List({
   );
 }
 
-function Memo({ memos, onUpdate, onDelete, onToggle, onCheck }) {
+function Memo({ memo, onCheck }) {
+  const { handleDelete, handleUpdate, handlePinned } = useContext(MemoContext);
   const [isEdit, setIsEdit] = useState(false);
-  const { id, title, content, isPinned, createdAt, updatedAt } = memos;
-  const [pinned, setIsPinned] = useState(isPinned);
+  const { id, title, content, isPinned, createdAt, updatedAt } = memo;
   const baseLi =
     "memo-item border border-appleBorder rounded-apple p-5 shadow-apple hover:shadow-appleHover hover:-translate-y-1 transition";
 
@@ -201,8 +191,7 @@ function Memo({ memos, onUpdate, onDelete, onToggle, onCheck }) {
             />
             <button
               className={`text-xl ${!isPinned ? "opacity-40 hover:opacity-100 transition" : ""}`}
-              // onClick={() => handlePinned(id, isPinned)}
-              onClick={() => onToggle(id, isPinned)}
+              onClick={() => handlePinned(id, isPinned)}
             >
               📌
             </button>
@@ -216,7 +205,13 @@ function Memo({ memos, onUpdate, onDelete, onToggle, onCheck }) {
           </div>
 
           <div className="flex gap-4 text-sm font-medium">
-            <button
+            <Link
+              to={"/memos/" + id}
+              className="text-black hover:underline flex items-center"
+            >
+              보기
+            </Link>
+            {/* <button
               className="text-appleBlue hover:underline"
               onClick={() => handleEdit(id)}
             >
@@ -224,14 +219,16 @@ function Memo({ memos, onUpdate, onDelete, onToggle, onCheck }) {
             </button>
             <button
               className="text-red-500 hover:underline"
-              onClick={() => onDelete(id)}
+              onClick={() => handleDelete(id)}
             >
               삭제
-            </button>
+            </button> */}
           </div>
         </div>
 
-        <h3 className="font-semibold mt-4 text-xl">{title}</h3>
+        <h3 className="font-semibold mt-4 text-xl">
+          <Link to={"/memos/" + id}>{title}</Link>
+        </h3>
         <p className="text-appleSub mt-2 leading-relaxed">{content}</p>
 
         <div className="text-xs text-appleSub mt-4">
@@ -239,32 +236,14 @@ function Memo({ memos, onUpdate, onDelete, onToggle, onCheck }) {
         </div>
       </li>
       {isEdit && (
-        <EditMemo memos={memos} onUpdate={onUpdate} setIsEdit={setIsEdit} />
+        <EditMemo memo={memo} onUpdate={handleUpdate} setIsEdit={setIsEdit} />
       )}
     </>
   );
 }
 
-function EmptyMemo({ isSearch }) {
-  return (
-    <div className="text-center py-16 text-appleSub">
-      <div className="text-5xl mb-3">📝</div>
-      {!isSearch ? (
-        <>
-          <p className="text-lg">검색된 메모가 없습니다</p>
-        </>
-      ) : (
-        <>
-          <p className="text-lg">아직 메모가 없습니다</p>
-        </>
-      )}
-      <p className="text-sm">새 메모를 추가해보세요!</p>
-    </div>
-  );
-}
-
-function EditMemo({ memos, onUpdate, setIsEdit }) {
-  const { id, title, content } = memos;
+function EditMemo({ memo, onUpdate, setIsEdit }) {
+  const { id, title, content } = memo;
   const [editedTitle, setEditedTitle] = useState(title);
   const [editedContent, setEditedContent] = useState(content);
 
@@ -309,5 +288,23 @@ function EditMemo({ memos, onUpdate, setIsEdit }) {
         </button>
       </div>
     </li>
+  );
+}
+
+function EmptyMemo({ isSearch }) {
+  return (
+    <div className="text-center py-16 text-appleSub">
+      <div className="text-5xl mb-3">📝</div>
+      {!isSearch ? (
+        <>
+          <p className="text-lg">검색된 메모가 없습니다</p>
+        </>
+      ) : (
+        <>
+          <p className="text-lg">아직 메모가 없습니다</p>
+        </>
+      )}
+      <p className="text-sm">새 메모를 추가해보세요!</p>
+    </div>
   );
 }

@@ -1,23 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { MemoContext, ACTION_TYPE } from "../App";
 import { getMemos } from "../api/memos.js";
 import { sortDate } from "../utils/date.js";
+import { useSearchParams } from "react-router-dom";
 
-export default function Search({
-  memos,
-  setMemos,
-  setIsLoading,
-  setError,
-  inputValue,
-  setInputValue,
-  searchQuery,
-  setSearchQuery,
-  handleSearchReset,
-  setIsSearch,
-}) {
+export default function Search({}) {
+  const { state, dispatch } = useContext(MemoContext);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [inputValue, setInputValue] = useState(""); // 입력 중인 값
+  const [searchQuery, setSearchQuery] = useState(""); // 적용된 검색어
   const [sortPinned, setSortPinned] = useState("all");
   const [sortDated, setSortDated] = useState("asc");
+
+  const query = searchParams.get("q") || "";
+  // console.log(query);
   const handleSearch = () => {
     setSearchQuery(inputValue); // 버튼 클릭 시에 검색어를 입력한 값으로 변경 처리
+    setSearchParams({ q: inputValue });
+  };
+
+  const handleSearchReset = () => {
+    setSearchQuery("");
+    setInputValue("");
   };
 
   const handleSort = async (sort, type) => {
@@ -41,7 +45,8 @@ export default function Search({
     }
 
     // setMemos(sortDate(newMemos, sortDated));
-    setMemos(newMemos);
+    // setMemos(newMemos);
+    dispatch({ type: ACTION_TYPE.set, payload: newMemos });
     // console.log(sort, type);
     // console.log(sortPinned);
     // console.log(sortDated);
@@ -54,12 +59,15 @@ export default function Search({
     const unPinned = data.items.filter((item) => !item.isPinned);
     if (sort === "pinned") {
       // console.log(pinned);
-      setMemos(pinned);
+      // setMemos(pinned);
+      dispatch({ type: ACTION_TYPE.set, payload: pinned });
     } else if (sort === "unPinned") {
       // console.log(unPinned);
-      setMemos(unPinned);
+      // setMemos(unPinned);
+      dispatch({ type: ACTION_TYPE.set, payload: unPinned });
     } else {
-      setMemos(data.items);
+      // setMemos(data.items);
+      dispatch({ type: ACTION_TYPE.set, payload: data.items });
     }
     setSortPinned(sort);
     console.log(sortPinned);
@@ -72,26 +80,33 @@ export default function Search({
     const data = await getMemos();
     if (sortPinned === "pinned") {
     }
-    setMemos(sortDate(data.items, sort));
+    // setMemos(sortDate(data.items, sort));
+    dispatch({ type: ACTION_TYPE.set, payload: sortDate(data.items, sort) });
   };
 
   // useEffect를 사용하여 의존성배열(검색어)가 바뀔때마다, 실행되도록 처리
   useEffect(() => {
     const fetchMemos = async () => {
-      setIsLoading(true);
-      setError(null);
+      dispatch({ type: ACTION_TYPE.loading, payload: true });
+      dispatch({ type: ACTION_TYPE.error, payload: null });
       try {
         const data = await getMemos({ q: searchQuery });
-        setMemos(data.items);
+        // setMemos(data.items);
+        dispatch({ type: ACTION_TYPE.set, payload: data.items });
         // console.log(data);
         if (data.items.length === 0) {
-          setIsSearch(false);
+          // setIsSearch(false);
+          dispatch({ type: ACTION_TYPE.search, payload: false });
         }
       } catch (err) {
-        setError("검색 데이터를 불러오지 못했습니다.");
-        console.error(err);
+        // setError("검색 데이터를 불러오지 못했습니다.");
+        // console.error(err);
+        dispatch({
+          type: ACTION_TYPE.error,
+          payload: "메모 검색 실패",
+        });
       } finally {
-        setIsLoading(false);
+        dispatch({ type: ACTION_TYPE.loading, payload: false });
       }
     };
     fetchMemos();

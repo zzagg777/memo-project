@@ -1,12 +1,21 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
+import { useNavigate, Link, useParams } from "react-router-dom";
+import { MemoContext } from "../App";
 
 // C : 입력 Form > 저장 addMemo  > 전송(POST) createMemo
-export default function Form({ onAdd }) {
+export default function Form({}) {
+  const navigate = useNavigate();
+  const { state, handleUpdate, handleCreate } = useContext(MemoContext);
+  const { id } = useParams();
+  const { memos } = state;
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [error, setError] = useState("");
   const titleRef = useRef(null);
   const contentRef = useRef(null);
+
+  const memo = id ? memos.find((m) => m.id === id) : null;
+  // console.log(id);
 
   const handleFocus = (ref) => {
     ref.current?.focus();
@@ -18,20 +27,35 @@ export default function Form({ onAdd }) {
     const isContent = content.trim();
 
     if (!isTitle) {
-      setError("제목을 입력해주세요.");
+      alert("제목을 입력해주세요.");
       handleFocus(titleRef);
       return false;
     }
     if (!isContent) {
-      setError("내용을 입력해주세요.");
+      alert("내용을 입력해주세요.");
       handleFocus(contentRef);
       return false;
     }
-    onAdd(title, content);
+    if (id) {
+      handleUpdate(id, {
+        title: title,
+        content: content,
+      });
+      navigate("/memos/" + id, { replace: true });
+    } else {
+      handleCreate(title, content);
+      navigate("/", { replace: true });
+    }
     setTitle("");
     setContent("");
-    setError("");
   };
+
+  useEffect(() => {
+    if (memo) {
+      setTitle(memo.title);
+      setContent(memo.content);
+    }
+  }, [memo]);
 
   return (
     <section className="bg-appleCard border border-appleBorder shadow-apple rounded-apple p-6 mb-8 transition hover:shadow-appleHover">
@@ -52,12 +76,18 @@ export default function Form({ onAdd }) {
           onChange={(e) => setContent(e.target.value)}
         ></textarea>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-4">
+          <Link
+            to={!id ? "/" : "/memos/" + id}
+            className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 transition"
+          >
+            취소
+          </Link>
           <button
-            className="bg-black text-white px-6 py-3 rounded-2xl hover:opacity-80 active:scale-95 transition font-medium"
+            className="px-4 py-2 rounded-xl bg-appleBlue text-white hover:brightness-110 transition"
             type="submit"
           >
-            추가
+            저장
           </button>
         </div>
       </form>
