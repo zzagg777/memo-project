@@ -22,6 +22,7 @@ export default function Search({}) {
   const handleSearchReset = () => {
     setSearchQuery("");
     setInputValue("");
+    setSearchParams({});
   };
 
   const handleSort = async (sort, type) => {
