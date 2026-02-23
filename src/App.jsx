@@ -1,4 +1,4 @@
-import { useState, createContext } from "react";
+import { useState, useReducer, createContext } from "react";
 import Header from "./components/Header";
 import Search from "./components/Search";
 import Form from "./components/Form";
@@ -14,6 +14,31 @@ import { createMemo, updateMemo, deleteMemo, pinnedMemo } from "./api/memos";
 //1.만들기 createContext()
 export const ThemeContext = createContext(null);
 
+const ACTION_TYPE = {
+  create: "create",
+  delete: "delete",
+  update: "update",
+};
+const initialState = {
+  memos: [],
+};
+const memoReducer = (state, action) => {
+  console.log("되나", state, action);
+  switch (action.type) {
+    case ACTION_TYPE.create:
+      return { ...state, memos: [action.payload, ...state.memos] };
+      break;
+    case ACTION_TYPE.delete:
+      return;
+      break;
+    case ACTION_TYPE.update:
+      return;
+      break;
+    default:
+      return state;
+  }
+};
+
 function App() {
   const [theme, setTheme] = useState("light");
   const [memos, setMemos] = useState([]);
@@ -22,13 +47,15 @@ function App() {
   const [error, setError] = useState(null);
   const [inputValue, setInputValue] = useState(""); // 입력 중인 값
   const [searchQuery, setSearchQuery] = useState(""); // 적용된 검색어
+  const [state, dispatch] = useReducer(memoReducer, initialState);
 
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
   const handleCreate = async (title, content) => {
     try {
       const newMemo = await createMemo({ title, content });
-      setMemos((prev) => [newMemo, ...prev]);
+      // setMemos((prev) => [newMemo, ...prev]);
+      dispatch({ type: ACTION_TYPE.create, payload: newMemo });
       handleSearchReset();
     } catch (err) {
       console.error("메모 저장 실패 : ", err);
